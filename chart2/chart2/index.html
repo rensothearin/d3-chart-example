@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pivot Demo</title>
+    <!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.13.0/pivot.min.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.13.0/pivot.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.6.0/tips_data.min.js"></script> -->
+
+    
+    <script type="text/javascript" src="./dist/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./dist/pivot.min.css" />
+    <script type="text/javascript" src="./dist/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="./dist/jquery.ui.touch-punch.min.js"></script>
+    <script type="text/javascript" src="./dist/pivot.min.js"></script>
+    <script type="text/javascript" src="./dist/tips_data.min.js"></script>
+    <style>
+      body {
+        font-family: Verdana;
+      }
+
+      .node {
+        border: solid 1px white;
+        font: 10px sans-serif;
+        line-height: 12px;
+        overflow: hidden;
+        position: absolute;
+        text-indent: 2px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      <a href="index.html">  PivotTable.js examples</a>
+    </p>
+    <div id="output"></div>
+
+    <script type="text/javascript">
+      $("#output").pivotUI($.pivotUtilities.tipsData, {
+        rows: ["sex", "smoker"],
+        cols: ["day", "time"],
+        vals: ["tip", "total_bill"],
+        renderers: $.pivotUtilities.d3_renderers,
+        aggregatorName: "Sum over Sum",
+        // rendererName: "Heatmap"
+        renderers: $.extend(
+          $.pivotUtilities.renderers,
+          $.pivotUtilities.d3_render
+        ),
+      });
+    </script>
+  </body>
+</html>

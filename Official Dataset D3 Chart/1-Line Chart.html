@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Handsontable and D3.js Integration</title>
+  <link rel="stylesheet" href="../libs/handsontable/handsontable.full.min.css">
+  <script src="../libs/handsontable/handsontable.full.min.js"></script>
+  <script src="../libs/d3.v6/d3.v6.min.js"></script>
+</head>
+<body>
+  <div id="example" style="margin-bottom: 20px;"></div>
+  <div id="my_dataviz"></div>
+
+  <script src="./js/Chart.js"></script>
+  <script>
+    
+        // Your JSON data
+        var xAxisYear1 = [
+        "구분 ",
+        "2005",
+        "2006",
+        "2007",
+        "2008",
+        "2009",
+        "2010",
+        "2011",
+        "2012",
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        ];
+
+        var data = [
+        xAxisYear1,
+        [
+            "전체 신규투자",
+            "7573",
+            "7333",
+            "9917",
+            "7247",
+            "8671",
+            "10910",
+            "12608",
+            "12333",
+            "13845",
+            "16393",
+            "20858",
+            "21503",
+            "23803",
+            "34249",
+            "42777",
+            "43045",
+            "76802",
+            "67640",
+            "22041",
+        ],
+        [
+            "바이오/의료 신규투자",
+            "653",
+            "596",
+            "585",
+            "400",
+            "638",
+            "840",
+            "933",
+            "1052",
+            "1463",
+            "2928",
+            "3170",
+            "4686",
+            "3788",
+            "8417",
+            "11033",
+            "11970",
+            "16770",
+            "11058",
+            "3665",
+        ],
+    ];
+    // Set the dimensions and margins of the graph
+    var dataSheet = function () {
+      return data;
+    };
+
+    var container = document.getElementById("example");
+    var tableData = null;
+    
+    var hot = new Handsontable(container, {
+      data: dataSheet(),
+      minSpareCols: 0,
+      minSpareRows: 1,
+      rowHeaders: true,
+      colHeaders: true,
+      contextMenu: true,
+      licenseKey: "non-commercial-and-evaluation",
+      afterChange: (changes) => {
+        if (changes) {
+          Chart.generateLineChart(tableData);
+        }
+      },
+    });
+
+    tableData = hot.getData();
+    
+    // Initial chart draw
+    Chart.generateLineChart(tableData);
+
+  </script>
+</body>
+</html>

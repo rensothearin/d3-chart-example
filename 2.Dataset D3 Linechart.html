@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset D3 Linechart</title>
+    <meta charset="utf-8">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.js"></script>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <div id="example"></div>
+</head>
+<body>
+
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz"></div>
+    <!-- #comment: render excelsheet div -->
+    <div id="example"></div>
+    <!-- #comment: line chart end -->
+
+    <script>
+        // Handson table code goes here
+        var xAxisYear1 = [
+        "구분 ",
+        " 2005년 ",
+        " 2006년 ",
+        " 2007년 ",
+        " 2008년 ",
+        " 2009년 ",
+        " 2010년 ",
+        " 2011년 ",
+        " 2012년 ",
+        " 2013년 ",
+        " 2014년 ",
+        " 2015년 ",
+        " 2016년 ",
+        " 2017년 ",
+        " 2018년 ",
+        " 2019년 ",
+        " 2020년 ",
+        " 2021년 ",
+        " 2022년 ",
+        " 2023년 6월 ",
+      ];
+
+        var data = [
+        xAxisYear1,
+        [
+          " 전체 신규투자 ",
+          "7,573",
+          "7,333",
+          "9,917",
+          " 7,247 ",
+          "8,671",
+          " 10,910 ",
+          " 12,608 ",
+          " 12,333 ",
+          " 13,845 ",
+          " 16,393 ",
+          " 20,858 ",
+          " 21,503 ",
+          " 23,803 ",
+          " 34,249 ",
+          " 42,777 ",
+          " 43,045 ",
+          " 76,802 ",
+          " 67,640 ",
+          " 22,041 ",
+        ],
+        [
+          " 바이오/의료 신규투자 ",
+          " 653 ",
+          " 596 ",
+          " 585 ",
+          " 400 ",
+          " 638 ",
+          " 840 ",
+          " 933 ",
+          " 1,052 ",
+          " 1,463 ",
+          " 2,928 ",
+          " 3,170 ",
+          " 4,686 ",
+          " 3,788 ",
+          " 8,417 ",
+          " 11,033 ",
+          " 11,970 ",
+          " 16,770 ",
+          " 11,058 ",
+          " 3,665 ",
+        ],
+      ];
+      var dataSheeet = function () {
+        return data;
+      };
+
+      var container = document.getElementById("example");
+
+      var hot = new Handsontable(container, {
+        data: dataSheeet(),
+        minSpareCols: 0,
+        minSpareRows: 1,
+        rowHeaders: true,
+        colHeaders: true,
+        contextMenu: true,
+        licenseKey: "non-commercial-and-evaluation",
+        afterChange: (changes) => {
+          changes?.forEach(([row, prop, oldValue, newValue]) => {
+            update(null, null, prop, row, newValue);
+            console.log("row:" + row);
+            console.log("prop:" + prop);
+            console.log("oldValue:" + oldValue);
+            console.log("newValue:" + newValue);
+          });
+        },
+      });
+
+      // #comment: function to update chart coresponse with the excel cell that are being updated
+      var update = function (instance, cell, x, y, value) {
+        //check if first row
+        if (y == 0) {
+          // check if not first column
+          if (x != 0) {
+            //add or update xaxis tick name (categorie)
+            if (value) {
+              chart.xAxis[0].categories[x - 1] = value;
+            } else {
+              chart.xAxis[0].categories[x - 1] = "";
+            }
+            chart.redraw();
+          }
+        } else {
+          // If the related series does not exists create a new one
+          if (!chart.series[y - 1]) {
+            // Create a new series row
+            var row = [];
+            for (i = 1; i < data[y].length; i++) {
+              row.push(parseFloat(data[y][i]));
+            }
+            // Append new series to the chart
+            chart.addSeries({ name: data[y][0], data: row });
+          } else {
+            if (x == 0) {
+              // Update legend
+              if (value) {
+                chart.series[y - 1].update({ name: value });
+              } else {
+                chart.series[y - 1].update({ name: "" });
+              }
+            } else {
+              // Update chart data
+              if (chart.series[y - 1].data[x - 1]) {
+                chart.series[y - 1].data[x - 1].update({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              } else {
+                chart.series[y - 1].addPoint({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              }
+            }
+          }
+        }
+      };
+
+
+
+        // Chart code goes here
+        // Set the dimensions and margins of the graph
+        var margin = {top: 10, right: 30, bottom: 30, left: 60},
+            width = 460 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        // Append the svg object to the body of the page
+        var svg = d3.select("#my_dataviz")
+                .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Your JSON data
+        var data = [
+            {"x": 1, "y": 2},
+            {"x": 2, "y": 3},
+            {"x": 3, "y": 5},
+            {"x": 4, "y": 7},
+            {"x": 5, "y": 11},
+            {"x": 6, "y": 13},
+            {"x": 7, "y": 17},
+            {"x": 8, "y": 19},
+            {"x": 9, "y": 23},
+            {"x": 10, "y": 29}
+        ];
+
+        // Add X axis
+        var x = d3.scaleLinear()
+                    .domain([1, d3.max(data, function(d) { return d.x; })])
+                    .range([0, width]);
+                    
+        svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+                .domain([0, d3.max(data, function(d) { return d.y; })])
+                .range([height, 0]);
+        svg.append("g")
+                .call(d3.axisLeft(y));
+
+        // This allows to find the closest X index of the mouse
+        var bisect = d3.bisector(function(d) { return d.x; }).left;
+
+        // Create the circle that travels along the curve of the chart
+        var focus = svg
+        .append('g')
+        .append('circle')
+        .style("fill", "black")
+        .attr("stroke", "black")
+        .attr('r', 2)
+        .style("opacity", 0);
+
+        // Create the text that travels along the curve of the chart
+        var focusText = svg
+            .append('g')
+            .append('text')
+            .style("opacity", 0)
+            .attr("text-anchor", "left")
+            .attr("alignment-baseline", "middle");
+
+        // Add the line
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "#8ed1fc")
+            .attr("stroke-width", 1.5)
+            .attr("d", d3.line()
+                        .x(function(d) { return x(d.x); })
+                        .y(function(d) { return y(d.y); })
+        );
+
+         // Add the points
+        svg
+        .append("g")
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+            .attr("cx", function(d) { return x(d.x) } )
+            .attr("cy", function(d) { return y(d.y) } )
+            .attr("r", 5)
+            .attr("fill", "#8ed1fc")
+
+        // Create a rect on top of the svg area: this rectangle recovers mouse position
+        svg.append('rect')
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .attr('width', width)
+            .attr('height', height)
+            .on('mouseover', mouseover)
+            .on('mousemove', mousemove)
+            .on('mouseout', mouseout);
+
+        // What happens when the mouse moves -> show the annotations at the right positions
+        function mouseover() {
+            focus.style("opacity", 1);
+            focusText.style("opacity", 1);
+        }
+
+        function mousemove() {
+        // Recover coordinate we need
+        var x0 = x.invert(d3.mouse(this)[0]);
+        var i = bisect(data, x0, 1);
+        var selectedData = data[i];
+        focus
+            .attr("cx", x(selectedData.x))
+            .attr("cy", y(selectedData.y));
+        focusText
+            .html("x:" + selectedData.x + "  -  y:" + selectedData.y)
+            .attr("x", x(selectedData.x) + 15)
+            .attr("y", y(selectedData.y));
+        }
+
+        function mouseout() {
+            focus.style("opacity", 0);
+            focusText.style("opacity", 0);
+        }
+
+    </script>
+</body>
+</html>
