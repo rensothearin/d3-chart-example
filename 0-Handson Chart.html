@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.js"></script>
+  </head>
+  <body>
+    <!-- #comment: line chart -->
+    <!-- #comment: render highchart div -->
+    <div id="container"></div>
+
+    <!-- #comment: render excelsheet div -->
+    <div id="example"></div>
+    <!-- #comment: line chart end -->
+
+<br>
+     <!-- #comment: render highchart div -->
+     <div id="container-bar"></div>
+
+     <!-- #comment: render excelsheet div -->
+     <div id="spreadsheet-bar"></div>
+
+   
+    <script>
+      // #comment: initial data array, this need to be the same as highchart series in highchart config to be consistant
+      var xAxisYear1 = [
+        "구분 ",
+        " 2005년 ",
+        " 2006년 ",
+        " 2007년 ",
+        " 2008년 ",
+        " 2009년 ",
+        " 2010년 ",
+        " 2011년 ",
+        " 2012년 ",
+        " 2013년 ",
+        " 2014년 ",
+        " 2015년 ",
+        " 2016년 ",
+        " 2017년 ",
+        " 2018년 ",
+        " 2019년 ",
+        " 2020년 ",
+        " 2021년 ",
+        " 2022년 ",
+        " 2023년 6월 ",
+      ];
+
+      var data = [
+        xAxisYear1,
+        [
+          " 전체 신규투자 ",
+          "7,573",
+          "7,333",
+          "9,917",
+          " 7,247 ",
+          "8,671",
+          " 10,910 ",
+          " 12,608 ",
+          " 12,333 ",
+          " 13,845 ",
+          " 16,393 ",
+          " 20,858 ",
+          " 21,503 ",
+          " 23,803 ",
+          " 34,249 ",
+          " 42,777 ",
+          " 43,045 ",
+          " 76,802 ",
+          " 67,640 ",
+          " 22,041 ",
+        ],
+        [
+          " 바이오/의료 신규투자 ",
+          " 653 ",
+          " 596 ",
+          " 585 ",
+          " 400 ",
+          " 638 ",
+          " 840 ",
+          " 933 ",
+          " 1,052 ",
+          " 1,463 ",
+          " 2,928 ",
+          " 3,170 ",
+          " 4,686 ",
+          " 3,788 ",
+          " 8,417 ",
+          " 11,033 ",
+          " 11,970 ",
+          " 16,770 ",
+          " 11,058 ",
+          " 3,665 ",
+        ],
+      ];
+      var dataSheeet = function () {
+        return data;
+      };
+
+      var container = document.getElementById("example");
+
+      var hot = new Handsontable(container, {
+        data: dataSheeet(),
+        minSpareCols: 0,
+        minSpareRows: 1,
+        rowHeaders: true,
+        colHeaders: true,
+        contextMenu: true,
+        licenseKey: "non-commercial-and-evaluation",
+        afterChange: (changes) => {
+          changes?.forEach(([row, prop, oldValue, newValue]) => {
+            update(null, null, prop, row, newValue);
+            console.log("row:" + row);
+            console.log("prop:" + prop);
+            console.log("oldValue:" + oldValue);
+            console.log("newValue:" + newValue);
+          });
+        },
+      });
+
+      // #comment: function to update chart coresponse with the excel cell that are being updated
+      var update = function (instance, cell, x, y, value) {
+        //check if first row
+        if (y == 0) {
+          // check if not first column
+          if (x != 0) {
+            //add or update xaxis tick name (categorie)
+            if (value) {
+              chart.xAxis[0].categories[x - 1] = value;
+            } else {
+              chart.xAxis[0].categories[x - 1] = "";
+            }
+            chart.redraw();
+          }
+        } else {
+          // If the related series does not exists create a new one
+          if (!chart.series[y - 1]) {
+            // Create a new series row
+            var row = [];
+            for (i = 1; i < data[y].length; i++) {
+              row.push(parseFloat(data[y][i]));
+            }
+            // Append new series to the chart
+            chart.addSeries({ name: data[y][0], data: row });
+          } else {
+            if (x == 0) {
+              // Update legend
+              if (value) {
+                chart.series[y - 1].update({ name: value });
+              } else {
+                chart.series[y - 1].update({ name: "" });
+              }
+            } else {
+              // Update chart data
+              if (chart.series[y - 1].data[x - 1]) {
+                chart.series[y - 1].data[x - 1].update({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              } else {
+                chart.series[y - 1].addPoint({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              }
+            }
+          }
+        }
+      };
+
+      var chart = null;
+      // #comment: highchart config
+      chart = Highcharts.chart("container", {
+        title: {
+          text: "Monthly Average Temperature",
+          x: -10, //center
+        },
+        subtitle: {
+          text: "Source: WorldClimate.com",
+          x: -20,
+        },
+        xAxis: {
+          categories: xAxisYear1.slice(1),
+        },
+        yAxis: {
+          title: {
+            text: "Temperature (°C)",
+          },
+          plotLines: [
+            {
+              value: 0,
+              width: 1,
+              color: "#808080",
+            },
+          ],
+        },
+        tooltip: {
+          valueSuffix: "°C",
+        },
+        legend: {
+          layout: "vertical",
+          align: "right",
+          verticalAlign: "middle",
+          borderWidth: 0,
+        },
+        // #comment: highchart series
+        series: [
+          {
+            name: "전체 신규투자",
+            data: [
+              7573, 7333, 9917, 7247, 8671, 10910, 12608, 12333, 13845, 16393,
+              20858, 21503, 23803, 34249, 42777, 43045, 76802, 67640, 22041,
+            ],
+          },
+          {
+            name: "바이오/의료 신규투자",
+            data: [
+              653, 596, 585, 400, 638, 840, 933, 1052, 1463, 2928, 3170, 4686,
+              3788, 8417, 11033, 11970, 16770, 11058, 3665,
+            ],
+          },
+        ],
+      });
+    </script>
+    <!-- #comment: line chart end-->
+
+    <!-- #comment: bar chart start -->
+    <script>
+      // Initialize an empty array to store the years
+      var xAxisYear = [
+        "구분 ",
+        " 2005년 ",
+        " 2006년 ",
+        " 2007년 ",
+        " 2008년 ",
+        " 2009년 ",
+        " 2010년 ",
+        " 2011년 ",
+        " 2012년 ",
+        " 2013년 ",
+        " 2014년 ",
+        " 2015년 ",
+        " 2016년 ",
+        " 2017년 ",
+        " 2018년 ",
+        " 2019년 ",
+        " 2020년 ",
+        " 2021년 ",
+        " 2022년 ",
+        " 2023년 6월 ",
+      ];
+
+      var data_bar = [
+        xAxisYear,
+        [
+          " 전체 신규투자 ",
+          "7,573",
+          "7,333",
+          "9,917",
+          " 7,247 ",
+          "8,671",
+          " 10,910 ",
+          " 12,608 ",
+          " 12,333 ",
+          " 13,845 ",
+          " 16,393 ",
+          " 20,858 ",
+          " 21,503 ",
+          " 23,803 ",
+          " 34,249 ",
+          " 42,777 ",
+          " 43,045 ",
+          " 76,802 ",
+          " 67,640 ",
+          " 22,041 ",
+        ],
+        [
+          " 바이오/의료 신규투자 ",
+          " 653 ",
+          " 596 ",
+          " 585 ",
+          " 400 ",
+          " 638 ",
+          " 840 ",
+          " 933 ",
+          " 1,052 ",
+          " 1,463 ",
+          " 2,928 ",
+          " 3,170 ",
+          " 4,686 ",
+          " 3,788 ",
+          " 8,417 ",
+          " 11,033 ",
+          " 11,970 ",
+          " 16,770 ",
+          " 11,058 ",
+          " 3,665 ",
+        ],
+      ];
+      var dataSheeet_bar = function () {
+        return data_bar;
+      };
+      var bar_chart = null;
+      bar_chart = Highcharts.chart("container-bar", {
+        chart: {
+          type: "column",
+        },
+        title: {
+          text: "title-align:left",
+          align: "left",
+        },
+        subtitle: {
+          text:
+            "subtitle-align:left " +
+            'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
+          align: "left",
+        },
+        xAxis: {
+          categories: xAxisYear.slice(1),
+          crosshair: true,
+          accessibility: {
+            description: "Countries",
+          },
+        },
+        yAxis: {
+          min: 0,
+          title: {
+            text: "1000 metric tons (MT)",
+          },
+        },
+        tooltip: {
+          valueSuffix: "N",
+        },
+        plotOptions: {
+          column: {
+            pointPadding: 0.2,
+            borderWidth: 0,
+          },
+        },
+        series: [
+          {
+            name: "전체 신규투자",
+            data: [
+              7573, 7333, 9917, 7247, 8671, 10910, 12608, 12333, 13845, 16393,
+              20858, 21503, 23803, 34249, 42777, 43045, 76802, 67640, 22041,
+            ],
+          },
+          {
+            name: "바이오/의료 신규투자",
+            data: [
+              653, 596, 585, 400, 638, 840, 933, 1052, 1463, 2928, 3170, 4686,
+              3788, 8417, 11033, 11970, 16770, 11058, 3665,
+            ],
+          },
+        ],
+      });
+
+      // #comment: function to update bar_chart coresponse with the excel cell that are being updated
+      var update_bar = function (instance, cell, x, y, value) {
+        //check if first row
+        if (y == 0) {
+          // check if not first column
+          if (x != 0) {
+            //add or update xaxis tick name (categorie)
+            if (value) {
+              bar_chart.xAxis[0].categories[x - 1] = value;
+            } else {
+              bar_chart.xAxis[0].categories[x - 1] = "";
+            }
+            bar_chart.redraw();
+          }
+        } else {
+          // If the related series does not exists create a new one
+          if (!bar_chart.series[y - 1]) {
+            // Create a new series row
+            var row = [];
+            for (i = 1; i < data_bar[y].length; i++) {
+              row.push(parseFloat(data_bar[y][i]));
+            }
+            // Append new series to the chart
+            bar_chart.addSeries({ name: data_bar[y][0], data: row });
+          } else {
+            if (x == 0) {
+              // Update legend
+              if (value) {
+                bar_chart.series[y - 1].update({ name: value });
+              } else {
+                bar_chart.series[y - 1].update({ name: "" });
+              }
+            } else {
+              // Update chart data
+              if (bar_chart.series[y - 1].data[x - 1]) {
+                bar_chart.series[y - 1].data[x - 1].update({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              } else {
+                bar_chart.series[y - 1].addPoint({
+                  y: parseFloat(value?.replace(/,/g, "")),
+                });
+              }
+            }
+          }
+        }
+      };
+  
+      //#comment: handson config
+      var hot = new Handsontable(document.getElementById("spreadsheet-bar"), {
+        data: dataSheeet_bar(),
+        minSpareCols: 0,
+        minSpareRows: 1,
+        rowHeaders: true,
+        colHeaders: true,
+        contextMenu: true,
+        licenseKey: "non-commercial-and-evaluation",
+        afterChange: (changes) => {
+          changes?.forEach(([row, prop, oldValue, newValue]) => {
+            update_bar(null, null, prop, row, newValue);
+           
+          });
+        },
+      });
+     
+    </script>
+    <!-- #comment: bar chart end -->
+  </body>
+</html>
